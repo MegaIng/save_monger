@@ -75,7 +75,7 @@ proc state_to_binary*(save_version: int,
                       clock_speed: uint32, 
                       description: string, 
                       camera_position: point,
-                      player_data = newSeq[uint8]()): seq[uint8] {. exportpy .}  =
+                      player_data: seq[uint8] = newSeq[uint8]()): seq[uint8] {. exportpy .}  =
 
   var dependencies: seq[int]
 
