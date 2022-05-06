@@ -1,7 +1,15 @@
+import nimpy
 import libraries/supersnappy/supersnappy
 import common, versions/v49, versions/v0, versions/v1, versions/v2, versions/v3
 export common
 const FORMAT_VERSION = 3'u8
+
+
+proc nimpyEnumConvert*(o: component_kind): string =
+  $o
+
+proc nimpyEnumConvert*(o: wire_kind): string =
+  $o
 
 proc file_get_bytes*(file_name: string): seq[uint8] =
   var file = open(file_name)
@@ -13,7 +21,7 @@ proc file_get_bytes*(file_name: string): seq[uint8] =
   file.close()
   return buffer
 
-proc parse_state*(input: seq[uint8], meta_only = false, solution = false): parse_result =
+proc parse_state*(input: seq[uint8], meta_only: bool = false, solution: bool = false): parse_result {. exportpy .} =
   
   # Versions modify the result object instead of returning a new one. 
   # This is so that defaults can be set here for values old versions may not parse
@@ -67,7 +75,7 @@ proc state_to_binary*(save_version: int,
                       clock_speed: uint32, 
                       description: string, 
                       camera_position: point,
-                      player_data = newSeq[uint8]()): seq[uint8] =
+                      player_data = newSeq[uint8]()): seq[uint8] {. exportpy .}  =
 
   var dependencies: seq[int]
 
@@ -100,3 +108,6 @@ proc state_to_binary*(save_version: int,
     result.add_wire(wire)
 
   return FORMAT_VERSION & compress(result)
+
+proc is_virtual*(component: component_kind): bool {. exportpy .} =
+  return component in VIRTUAL_KINDS
