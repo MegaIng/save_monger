@@ -44,11 +44,7 @@ class ParseResult(TypedDict):
     image_data: list[int] | bytes
 
 
-def is_virtual(component_kind: str | int) -> bool:
-    pass
-
-
-def parse_state(input: bytes, meta_only: bool, solution: bool) -> ParseResult:
+def parse_state(input: bytes, meta_only: bool = False, solution: bool = False) -> ParseResult:
     pass
 
 
@@ -61,8 +57,8 @@ def state_to_binary(save_version: int,
                     clock_speed: int,
                     description: str,
                     camera_position: Point,
-                    player_data: list[int] | bytes) -> bytes:
+                    player_data: list[int] | bytes = b"") -> bytes:
     pass
 
 
-from save_monger.save_monger import is_virtual, state_to_binary, parse_state
+from save_monger.save_monger import state_to_binary, parse_state
