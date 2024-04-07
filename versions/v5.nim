@@ -1,3 +1,4 @@
+import ../libraries/supersnappy/supersnappy
 import ../common
 
 const TELEPORT_WIRE = 0b0010_0000'u8
@@ -11,22 +12,6 @@ const DIRECTIONS = [
   point(x: 0, y: -1),
   point(x: 1, y: -1),
 ]
-
-func get_seq_i64(input: seq[uint8], i: var int): seq[int] =
-  let len = get_int(input, i)
-  for j in 0..len - 1:
-    result.add(get_int(input, i))
-
-func get_string(input: seq[uint8], i: var int): string =
-  let len = get_int(input, i)
-  for j in 0..len - 1:
-    result.add(chr(get_u8(input, i)))
-
-func get_point(input: seq[uint8], i: var int): point =
-  return point(
-    x: get_i16(input, i), 
-    y: get_i16(input, i)
-  )
 
 func get_component(input: seq[uint8], i: var int, solution = false): parse_component =
   try: # Only fails for obsolete components (deleted enum values)
@@ -42,10 +27,20 @@ func get_component(input: seq[uint8], i: var int, solution = false): parse_compo
   result.rotation = get_u8(input, i)
   result.permanent_id = get_int(input, i)
   result.custom_string = get_string(input, i)
-  if result.kind in [Program8_1, DELETED_6, DELETED_7, Program8_4, Program]:
-    discard get_string(input, i)
-  elif result.kind == Custom:
+  result.setting_1 = get_u64(input, i)
+  result.setting_2 = get_u64(input, i)
+
+  if result.kind == Custom:
     result.custom_id = get_int(input, i)
+    result.custom_displacement = get_point(input, i)
+
+  elif result.kind in [Program8_1, Program8_4, Program]:
+    let len = get_u16(input, i)
+    var j = 0'u16
+    while j < len:
+      let key = get_int(input, i)
+      result.selected_programs[key] = get_string(input, i)
+      j += 1
 
 func get_components(input: seq[uint8], i: var int, solution = false): seq[parse_component] =
   let len = get_int(input, i)
@@ -55,7 +50,6 @@ func get_components(input: seq[uint8], i: var int, solution = false): seq[parse_
     result.add(comp)
 
 func get_wire(input: seq[uint8], i: var int): parse_wire =
-  discard get_int(input, i) # used to be permanent_id
   result.kind = wire_kind(get_u8(input, i))
   result.color = get_u8(input, i)
   result.comment = get_string(input, i)
@@ -92,20 +86,24 @@ func get_wires(input: seq[uint8], i: var int): seq[parse_wire] =
   for j in 0..len - 1:
     result.add(get_wire(input, i))
 
-proc parse*(bytes: seq[uint8], headers_only: bool, solution: bool, parse_result: var parse_result) =
-  var i = 1 # 0th byte is version
+proc parse*(compressed: seq[uint8], headers_only: bool, solution: bool, parse_result: var parse_result) =
+  var bytes = uncompress(compressed[1..^1])
+  var i = 0
 
   parse_result.save_id = get_int(bytes, i)
-  parse_result.gate = get_u32(bytes, i).int
-  parse_result.delay = get_u32(bytes, i).int
+  parse_result.hub_id = get_u32(bytes, i)
+  parse_result.gate = get_int(bytes, i)
+  parse_result.delay = get_int(bytes, i)
   parse_result.menu_visible = get_bool(bytes, i)
   parse_result.clock_speed = get_u32(bytes, i)
-  discard get_u8(bytes, i) # Used to be nesting level
-  parse_result.dependencies = get_seq_i64(bytes, i)
+  parse_result.dependencies = get_seq_int(bytes, i)
   parse_result.description = get_string(bytes, i)
-  discard get_bool(bytes, i)
   parse_result.camera_position = get_point(bytes, i)
-  discard get_bool(bytes, i)
+  parse_result.synced = get_sync_state(bytes, i)
+  parse_result.campaign_bound = get_bool(bytes, i)
+  discard get_u16(bytes, i) # Eventually used for architecture score
+  parse_result.player_data = get_seq_u8(bytes, i)
+  parse_result.hub_description = get_string(bytes, i)
 
   if not headers_only:
     parse_result.components = get_components(bytes, i, solution)

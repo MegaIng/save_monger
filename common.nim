@@ -25,8 +25,8 @@ type component_kind* = enum
   VirtualRam8             = 18
   DELETED_0               = 19
   DELETED_1               = 20
-  Stack                   = 21
-  VirtualStack            = 22
+  DELETED_17              = 21
+  DELETED_18              = 22
   Register8               = 23
   VirtualRegister8        = 24
   Register8Red            = 25
@@ -57,7 +57,7 @@ type component_kind* = enum
   FullAdder               = 50
   BitMemory               = 51
   VirtualBitMemory        = 52
-  SRLatch                 = 53
+  DELETED_10              = 53
   Decoder2                = 54
   Timing                  = 55
   NoteSound               = 56
@@ -95,7 +95,7 @@ type component_kind* = enum
   Output64                = 88
   LevelOutputArch         = 89
   LevelOutputCounter      = 90
-  LevelInputOutput        = 91
+  DELETED_11              = 91
   Custom                  = 92
   VirtualCustom           = 93
   Program                 = 94
@@ -140,11 +140,11 @@ type component_kind* = enum
   Output16                = 126
   Output32                = 127
 
-  Bidirectional1          = 128
-  Bidirectional8          = 129
-  Bidirectional16         = 130
-  Bidirectional32         = 131
-  Bidirectional64         = 132
+  DELETED_12              = 128
+  DELETED_13              = 129
+  DELETED_14              = 130
+  DELETED_15              = 131
+  DELETED_16              = 132
 
   Buffer8                 = 133
   Buffer16                = 134
@@ -277,11 +277,32 @@ type component_kind* = enum
   LevelOutput1            = 242
   LevelOutput8            = 243
 
-const EARLY_KINDS*    = [LevelInput1, LevelInput2Pin, LevelInput3Pin, LevelInput4Pin, LevelInputConditions, LevelInput8, Input64, LevelInputCode, LevelOutput1, LevelOutput1Sum, LevelOutput1Car, LevelOutput2Pin, LevelOutput3Pin, LevelOutput4Pin, LevelOutput8, LevelOutputArch, LevelOutputCounter, LevelInputOutput, LevelOutput8z, DelayLine1, DelayLine16, BitMemory, Ram8, Hdd, Register8, Counter32, Counter16, Register16, DelayLine8, Custom, SolutionRom, RamFast, Counter64, Rom, Register32, Ram, Register8RedPlus, DelayLine64, Stack, Register64, DelayLine32, Counter8, Register8Red, RamLatency, RamDualLoad, DelayLine1, DelayLine16, BitMemory, Ram8, Hdd, Register8, Counter32, Counter16, Register16, DelayLine8, Custom, SolutionRom, RamFast, Counter64, Rom, Register32, Ram, Register8RedPlus, DelayLine64, Stack, Register64, DelayLine32, Counter8, Register8Red, RamLatency, RamDualLoad]
-const LATE_KINDS*     = [VirtualDelayLine1, VirtualDelayLine8, VirtualDelayLine16, VirtualDelayLine32, VirtualDelayLine64, VirtualBitMemory, VirtualRam8, VirtualRegister8, VirtualCounter32, VirtualCounter16, VirtualRegister16, VirtualCustom, VirtualRamFast, VirtualCounter64, VirtualRegister32, VirtualRam, VirtualRegister8RedPlus, VirtualStack, VirtualRegister64, VirtualCounter8, VirtualRegister8Red, VirtualRamLatency, VirtualRom, VirtualSolutionRom, VirtualHdd, VirtualRamDualLoad]
-const CUSTOM_INPUTS*  = [Input1, Input8, Input16, Input32, Input64]
-const CUSTOM_OUTPUTS* = [Output1, Output8, Output16, Output32, Output64]
-const LATCHES*        = [AndOrLatch, NandNandLatch, NorNorLatch]
+  Ashr8                   = 244
+  Ashr16                  = 245
+  Ashr32                  = 246
+  Ashr64                  = 247
+
+  Bidirectional1          = 248
+  VirtualBidirectional1   = 249
+  Bidirectional8          = 250
+  VirtualBidirectional8   = 251
+  Bidirectional16         = 252
+  VirtualBidirectional16  = 253
+  Bidirectional32         = 254
+  VirtualBidirectional32  = 255
+  Bidirectional64         = 256
+  VirtualBidirectional64  = 257
+
+const EARLY_KINDS*             = {LevelInput1, LevelInput2Pin, LevelInput3Pin, LevelInput4Pin, LevelInputConditions, LevelInput8, Input64, LevelInputCode, LevelOutput1, LevelOutput1Sum, LevelOutput1Car, LevelOutput2Pin, LevelOutput3Pin, LevelOutput4Pin, LevelOutput8, LevelOutputArch, LevelOutputCounter, LevelOutput8z, DelayLine1, DelayLine16, BitMemory, Ram8, Hdd, Register8, Counter32, Counter16, Register16, DelayLine8, Custom, SolutionRom, RamFast, Counter64, Rom, Register32, Ram, Register8RedPlus, DelayLine64, Register64, DelayLine32, Counter8, Register8Red, RamLatency, RamDualLoad, DelayLine1, DelayLine16, BitMemory, Ram8, Hdd, Register8, Counter32, Counter16, Register16, DelayLine8, Custom, SolutionRom, RamFast, Counter64, Rom, Register32, Ram, Register8RedPlus, DelayLine64, Register64, DelayLine32, Counter8, Register8Red, RamLatency, RamDualLoad, Bidirectional1, Bidirectional8, Bidirectional16, Bidirectional32, Bidirectional64}
+const LATE_KINDS*              = {VirtualCounter8, VirtualCounter64, VirtualRam8, VirtualRegister8, VirtualRegister8Red, VirtualRegister8RedPlus, VirtualRegister64, VirtualBitMemory, VirtualCustom, VirtualDelayLine1, VirtualRegister16, VirtualCounter16, VirtualRegister32, VirtualCounter32, VirtualRam, VirtualRamLatency, VirtualRamFast, VirtualRom, VirtualSolutionRom, VirtualDelayLine8, VirtualDelayLine16, VirtualDelayLine32, VirtualDelayLine64, VirtualRamDualLoad, VirtualHdd, VirtualBidirectional1, VirtualBidirectional8, VirtualBidirectional16, VirtualBidirectional32, VirtualBidirectional64}
+const CUSTOM_INPUTS*           = {Input1, Input8, Input16, Input32, Input64}
+const CUSTOM_OUTPUTS*          = {Output1, Output8, Output16, Output32, Output64}
+const CUSTOM_TRISTATE_OUTPUTS* = {Output1z, Output8z, Output16z, Output32z, Output64z}
+const CUSTOM_BIDIRECTIONAL*    = {Bidirectional1, Bidirectional8, Bidirectional16, Bidirectional32, Bidirectional64}
+const LEVEL_INPUTS*            = {LevelInput1, LevelInput2Pin, LevelInput3Pin, LevelInput4Pin, LevelInput8, LevelInputArch, LevelInputCode, LevelInputConditions}
+const LEVEL_OUTPUTS*           = {LevelOutput1, LevelOutput1Car, LevelOutput1Sum, LevelOutput2Pin, LevelOutput3Pin, LevelOutput4Pin, LevelOutput8, LevelOutput8z, LevelOutputArch, LevelOutputCounter}
+const LATCHES*                 = {AndOrLatch, NandNandLatch, NorNorLatch}
+const DELETED_KINDS*           = {DELETED_0, DELETED_1, DELETED_2, DELETED_3, DELETED_4, DELETED_5, DELETED_6, DELETED_7, DELETED_9, DELETED_9, DELETED_10, DELETED_11, DELETED_12, DELETED_13, DELETED_14, DELETED_15, DELETED_16, DELETED_17, DELETED_18}
 
 type point* = object
   x*: int16
@@ -305,18 +326,24 @@ type wire_kind* = enum
   wk_32
   wk_64
 
+type sync_state* = enum
+  unsynced
+  synced
+  changed_after_sync
+
 type parse_component* = object
   kind*: component_kind
   position*: point
+  custom_displacement*: point
   rotation*: uint8
   real_offset*: int8
   permanent_id*: int
   custom_string*: string
   custom_id*: int
-  nudge_on_add*: point
   setting_1*: uint64
   setting_2*: uint64
   selected_programs*: Table[int, string]
+  ui_order*: int16
 
 type parse_wire* = object
   path*: seq[point]
@@ -328,7 +355,9 @@ type parse_result* = object
   version*: uint8
   components*: seq[parse_component]
   wires*: seq[parse_wire]
-  save_version*: int # Custom component id, is pre sandbox architecture, also for checking if the level has been updated
+  save_id*: int # Unique id for each architectures and custom components. For levels it serves as a check against outdated versions
+  hub_id*: uint32
+  hub_description*: string
   gate*: int
   delay*: int
   menu_visible*: bool
@@ -337,16 +366,27 @@ type parse_result* = object
   description*: string
   camera_position*: point
   player_data*: seq[uint8]
-  image_data*: seq[uint8]
+  synced*: sync_state
+  campaign_bound*: bool
 
+# Unfortunately casting to uints is necessary to avoid crashing on under / overflows
 proc `+`*(a: point, b: point): point =
-  return point(x: a.x + b.x, y: a.y + b.y)
+  return point(
+    x: cast[int16](cast[uint16](a.x) + cast[uint16](b.x)), 
+    y: cast[int16](cast[uint16](a.y) + cast[uint16](b.y))
+  )
 
 proc `-`*(a: point, b: point): point =
-  return point(x: a.x - b.x, y: a.y - b.y)
+  return point(
+    x: cast[int16](cast[uint16](a.x) - cast[uint16](b.x)), 
+    y: cast[int16](cast[uint16](a.y) - cast[uint16](b.y))
+  )
 
 proc `*`*(a: point, b: int16): point =
-  return point(x: a.x * b, y: a.y * b)
+  return point(
+    x: cast[int16](cast[uint16](a.x) * cast[uint16](b)),
+    y: cast[int16](cast[uint16](a.y) * cast[uint16](b))
+  )
 
 proc get_bool*(input: seq[uint8], i: var int): bool =
   result = input[i] != 0
@@ -389,20 +429,27 @@ proc get_i8*(input: seq[uint8], i: var int): int8 =
   result = cast[int8](input[i])
   i += 1
 
+proc get_sync_state*(input: seq[uint8], i: var int): sync_state =
+  result = sync_state(get_u8(input, i))
+
 proc get_point*(input: seq[uint8], i: var int): point =
   return point(
     x: get_i16(input, i), 
     y: get_i16(input, i)
   )
 
-proc get_seq_u8*(input: seq[uint8], i: var int): seq[uint8] =
-  let len = get_u16(input, i)
-  var j = 0'u16
+proc get_seq_u8*(input: seq[uint8], i: var int, bits32 = false): seq[uint8] =
+  var len = 0
+  if bits32:
+    len = get_u32(input, i).int
+  else:
+    len = get_u16(input, i).int
+  var j = 0
   while j < len:
     result.add(get_u8(input, i))
     j += 1
 
-proc get_seq_i64*(input: seq[uint8], i: var int): seq[int] =
+proc get_seq_int*(input: seq[uint8], i: var int): seq[int] =
   let len = get_u16(input, i)
   var j = 0'u16
   while j < len:
@@ -449,18 +496,27 @@ proc add_i16*(arr: var seq[uint8], input: int16) =
 proc add_u8*(arr: var seq[uint8], input: uint8) =
   arr.add(input)
 
+proc add_i8*(arr: var seq[uint8], input: int8) =
+  arr.add(cast[uint8](input))
+
 proc add_component_kind*(arr: var seq[uint8], input: component_kind) =
   arr.add_u16(ord(input).uint16)
 
 proc add_wire_kind*(arr: var seq[uint8], input: wire_kind) =
   arr.add(ord(input).uint8)
 
+proc add_sync_state*(arr: var seq[uint8], input: sync_state) =
+  arr.add(ord(input).uint8)
+
 proc add_point*(arr: var seq[uint8], input: point) =
   arr.add_i16(input.x)
   arr.add_i16(input.y)
 
-proc add_seq_uint8*(arr: var seq[uint8], input: seq[uint8]) =
-  arr.add_u16(input.len.uint16)
+proc add_seq_u8*(arr: var seq[uint8], input: seq[uint8], bits32 = false) =
+  if bits32:
+    arr.add_u32(input.len.uint32)
+  else:
+    arr.add_u16(input.len.uint16)
   for i in input:
     arr.add_u8(i)
 

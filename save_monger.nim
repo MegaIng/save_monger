@@ -1,11 +1,19 @@
+import os
 import libraries/supersnappy/supersnappy
-import common, versions/v49, versions/v0, versions/v1, versions/v2, versions/v3
+import common, versions/[v0,v1,v2,v3,v4,v5,v6]
 export common
-
-const SAVE_VERSION* = 3'u8
+const LATES_VERSION* = 6'u8
 
 proc file_get_bytes*(file_name: string): seq[uint8] =
-  var file = open(file_name)
+  
+  if not fileExists(file_name): 
+    return
+  
+  var file: File
+  
+  # Since the game loads files from 2 different threads, we can't assume the file isn't locked (on Windows)
+  while not file.open(file_name):
+    sleep(1)
   defer: file.close()
 
   let len = getFileSize(file)
@@ -15,7 +23,7 @@ proc file_get_bytes*(file_name: string): seq[uint8] =
   discard file.readBytes(buffer, 0, len)
   return buffer
 
-proc parse_state*(input: seq[uint8], meta_only = false, solution = false): parse_result =
+proc parse_state*(input: seq[uint8], headers_only = false, solution = false): parse_result =
   
   # Versions modify the result object instead of returning a new one. 
   # This is so that defaults can be set here for values old versions may not parse
@@ -30,11 +38,13 @@ proc parse_state*(input: seq[uint8], meta_only = false, solution = false): parse
   result.version = input[0]
 
   case result.version:
-    of 49: v49.parse(input, meta_only, solution, result) # This is an ancient ascii version, where 49 meant "1"
-    of 0:  v0.parse(input, meta_only, solution, result)
-    of 1:  v1.parse(input, meta_only, solution, result)
-    of 2:  v2.parse(input, meta_only, solution, result)
-    of 3:  v3.parse(input, meta_only, solution, result)
+    of 0: v0.parse(input, headers_only, solution, result)
+    of 1: v1.parse(input, headers_only, solution, result)
+    of 2: v2.parse(input, headers_only, solution, result)
+    of 3: v3.parse(input, headers_only, solution, result)
+    of 4: v4.parse(input, headers_only, solution, result)
+    of 5: v5.parse(input, headers_only, solution, result)
+    of 6: v6.parse(input, headers_only, solution, result)
     else: discard
 
 proc add_component(arr: var seq[uint8], component: parse_component) =
@@ -45,9 +55,11 @@ proc add_component(arr: var seq[uint8], component: parse_component) =
   arr.add_string(component.custom_string)
   arr.add_u64(component.setting_1)
   arr.add_u64(component.setting_2)
+  arr.add_i16(component.ui_order)
+
   if component.kind == Custom:
     arr.add_int(component.custom_id)
-    arr.add_point(component.nudge_on_add)
+    arr.add_point(component.custom_displacement)
   elif component.kind in [Program8_1, Program8_4, Program]:
     arr.add_u16(component.selected_programs.len.uint16)
     for level, program in component.selected_programs:
@@ -60,7 +72,7 @@ proc add_wire(arr: var seq[uint8], wire: parse_wire) =
   arr.add_string(wire.comment)
   arr.add_path(wire.path)
 
-proc state_to_binary*(save_version: int, 
+proc state_to_binary*(save_id: int, 
                       components: seq[parse_component], 
                       wires: seq[parse_wire], 
                       gate: int, 
@@ -69,6 +81,10 @@ proc state_to_binary*(save_version: int,
                       clock_speed: uint32, 
                       description: string, 
                       camera_position: point,
+                      hub_id: uint32,
+                      hub_description: string,
+                      synced = unsynced,
+                      campaign_bound = false,
                       player_data = newSeq[uint8]()): seq[uint8] =
 
   var dependencies: seq[int]
@@ -81,7 +97,8 @@ proc state_to_binary*(save_version: int,
     if component.kind == WireCluster: continue
     components_to_save.add(id)
 
-  result.add_int(save_version)
+  result.add_int(save_id)
+  result.add_u32(hub_id)
   result.add_int(gate)
   result.add_int(delay)
   result.add_bool(menu_visible)
@@ -89,9 +106,11 @@ proc state_to_binary*(save_version: int,
   result.add_seq_int(dependencies)
   result.add_string(description)
   result.add_point(camera_position)
-  result.add_bool(false) # Eventually architecture score data
-  result.add_seq_uint8(newSeq[uint8]()) # Eventually image data
-  result.add_seq_uint8(player_data)
+  result.add_sync_state(synced)
+  result.add_bool(campaign_bound)
+  result.add_u16(0'u16) # Eventually used for architecture score
+  result.add_seq_u8(player_data)
+  result.add_string(hub_description)
 
   result.add_int(components_to_save.len)
   for id in components_to_save:
@@ -101,4 +120,4 @@ proc state_to_binary*(save_version: int,
   for id, wire in wires:
     result.add_wire(wire)
 
-  return SAVE_VERSION & compress(result)
+  return LATES_VERSION & compress(result)

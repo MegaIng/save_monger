@@ -16,7 +16,11 @@ const DIRECTIONS = [
 
 func get_component(input: seq[uint8], i: var int, solution = false): parse_component =
   try: # Only fails for obsolete components (deleted enum values)
-    result = parse_component(kind: component_kind(get_u16(input, i).int))
+    var kind = component_kind(get_u16(input, i).int)
+    let index = [DELETED_12, DELETED_13, DELETED_14, DELETED_15, DELETED_16].find(kind)
+    if index != -1:
+      kind = [Bidirectional1, Bidirectional8, Bidirectional16, Bidirectional32, Bidirectional64][index]
+    result = parse_component(kind: kind)
   except: discard
   if solution and result.kind == Rom:
     result.kind = SolutionRom
@@ -29,7 +33,7 @@ func get_component(input: seq[uint8], i: var int, solution = false): parse_compo
 
   if result.kind == Custom:
     result.custom_id = get_int(input, i)
-    result.nudge_on_add = get_point(input, i)
+    result.custom_displacement = get_point(input, i)
 
   elif result.kind in [Program8_1, Program8_4, Program]:
     let len = get_u16(input, i)
@@ -43,7 +47,7 @@ func get_components(input: seq[uint8], i: var int, solution = false): seq[parse_
   let len = get_int(input, i)
   for j in 0..len - 1:
     let comp = get_component(input, i, solution)
-    if comp.kind == Error: continue
+    if comp.kind == Error or comp.kind in DELETED_KINDS: continue
     result.add(comp)
 
 func get_wire(input: seq[uint8], i: var int): parse_wire =
@@ -83,22 +87,22 @@ func get_wires(input: seq[uint8], i: var int): seq[parse_wire] =
   for j in 0..len - 1:
     result.add(get_wire(input, i))
 
-proc parse*(compressed: seq[uint8], meta_only: bool, solution: bool, parse_result: var parse_result) =
+proc parse*(compressed: seq[uint8], headers_only: bool, solution: bool, parse_result: var parse_result) =
   var bytes = uncompress(compressed[1..^1])
   var i = 0
 
-  parse_result.save_version = rand(int.high) # This version was live for 2 hours only, because this field was missing, which causes custom components to crash
+  parse_result.save_id = rand(int.high) # This version was live for 2 hours only, because this field was missing, which causes custom components to crash
   parse_result.gate = get_int(bytes, i)
   parse_result.delay = get_int(bytes, i)
   parse_result.menu_visible = get_bool(bytes, i)
   parse_result.clock_speed = get_u32(bytes, i)
-  parse_result.dependencies = get_seq_i64(bytes, i)
+  parse_result.dependencies = get_seq_int(bytes, i)
   parse_result.description = get_string(bytes, i)
   parse_result.camera_position = get_point(bytes, i)
   discard get_bool(bytes, i)
-  parse_result.image_data = get_seq_u8(bytes, i)
+  discard get_seq_u8(bytes, i)
   parse_result.player_data = get_seq_u8(bytes, i)
 
-  if not meta_only:
+  if not headers_only:
     parse_result.components = get_components(bytes, i, solution)
     parse_result.wires = get_wires(bytes, i)
